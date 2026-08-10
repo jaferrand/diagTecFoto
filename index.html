@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Técnica Fotográfica II · Evaluación diagnóstica</title>
+<style>
+:root{--bg:#f3f5f7;--card:#fff;--text:#17191c;--muted:#68717c;--line:#dfe3e7;--red:#b71f2c;--dark:#17191c;--soft:#f8f9fa;--ok:#11653e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text)}
+header{background:#fff;border-bottom:1px solid var(--line)}.top{max-width:940px;margin:auto;padding:16px 20px;display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--red);color:#fff;font-weight:900}.brand{font-weight:850}.brand small{display:block;font-size:10px;color:var(--muted);letter-spacing:.08em;margin-top:2px}
+main{max-width:940px;margin:28px auto;padding:0 18px 50px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:0 12px 28px rgba(0,0,0,.055)}
+.eyebrow{font-size:12px;font-weight:850;color:var(--red);text-transform:uppercase;letter-spacing:.1em}h1{font-size:clamp(29px,5vw,42px);line-height:1.05;margin:7px 0 12px}h2{margin:0 0 10px}p{line-height:1.55}.muted{color:var(--muted)}
+.name{max-width:520px;margin:22px 0 8px}.name label{font-size:13px;font-weight:800;display:block;margin-bottom:7px}.name input{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;font:inherit}
+.note{background:var(--soft);border:1px solid var(--line);padding:12px 14px;border-radius:10px;color:#505862;font-size:14px;margin:14px 0 4px}
+.question{padding:24px 0;border-top:1px solid var(--line)}.question:first-child{border-top:0}.num{font-size:11px;color:var(--red);font-weight:850;letter-spacing:.05em}.qtext{font-size:18px;font-weight:750;line-height:1.42;margin:7px 0 13px}
+.option{display:flex;gap:10px;border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin:8px 0;cursor:pointer;line-height:1.4}.option:hover{background:#f8f9fa}.option input{margin-top:3px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.btn{border:0;background:var(--dark);color:#fff;border-radius:10px;padding:12px 17px;font-weight:800;font-size:14px;cursor:pointer}.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}
+.error{background:#faeded;color:#751e25;border:1px solid #ebcfd2;padding:12px 14px;border-radius:10px;margin-top:14px}.success{background:#eaf6ef;color:var(--ok);border:1px solid #c9e5d4;padding:13px 15px;border-radius:10px}.hidden{display:none!important}
+.scorebox{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0}.score{border:1px solid var(--line);border-radius:12px;padding:14px}.score strong{font-size:25px;display:block}.score span{font-size:11px;color:var(--muted)}
+.summary{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0}.summary h3{margin:0 0 9px}.area{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.area:first-of-type{border-top:0;padding-top:0}.area b{display:block;margin-bottom:4px}
+@media(max-width:680px){.card{padding:19px}.scorebox{grid-template-columns:1fr 1fr}.qtext{font-size:16px}}
+</style>
+</head>
+<body>
+<header><div class="top"><div class="logo">A</div><div class="brand">ALPES<small>FC207-23 · EVALUACIÓN DIAGNÓSTICA</small></div></div></header>
+<main>
+<section id="exam" class="card">
+<div class="eyebrow">Evaluación diagnóstica</div>
+<h1>Técnica Fotográfica II</h1>
+<p class="muted">Esta evaluación busca conocer el punto de partida del curso. No corresponde a una calificación sumativa.</p>
+<div class="name"><label>Nombre y apellido</label><input id="studentName" maxlength="90" placeholder="Ej.: Camila González"></div>
+<div class="note">Puedes finalizar aunque dejes preguntas sin responder. Las preguntas no respondidas se contabilizarán como incorrectas.</div>
+<form id="form"><div id="questions"></div><button class="btn" type="submit" id="finish">Finalizar evaluación</button></form>
+<div id="error" class="error hidden"></div>
+</section>
+
+<section id="result" class="card hidden">
+<div class="eyebrow">Diagnóstico completado</div>
+<h1 id="resultTitle">Resultado</h1>
+<div class="success"><strong id="studentLabel"></strong><br>Tu evaluación fue procesada correctamente.</div>
+
+<div class="scorebox">
+<div class="score"><strong id="score"></strong><span>Puntaje</span></div>
+<div class="score"><strong id="percent"></strong><span>Resultado</span></div>
+<div class="score"><strong id="correct"></strong><span>Correctas</span></div>
+<div class="score"><strong id="blank"></strong><span>Sin responder</span></div>
+</div>
+
+<div class="summary">
+<h3>Resumen de tu diagnóstico</h3>
+<p id="generalSummary"></p>
+<div id="areaSummary"></div>
+</div>
+
+<p class="muted">Presiona el botón para abrir tu aplicación de correo. El destinatario, el asunto y el resumen de tu evaluación quedarán preparados automáticamente.</p>
+<div class="actions"><button class="btn" id="sendEmail">Enviar evaluación al profesor</button></div>
+</section>
+</main>
+
+<script>
+const COURSE={"code": "FC207-23", "title": "Técnica Fotográfica II", "areas": {"exposicion": {"label": "Exposición y control de cámara", "strong": "Muestras una base sólida para tomar decisiones de exposición y manejar los controles principales de cámara.", "mid": "Tienes una base reconocible en exposición y manejo de cámara, aunque todavía conviene ganar seguridad al relacionar diafragma, velocidad e ISO en situaciones concretas.", "low": "Será útil reforzar la relación entre diafragma, velocidad e ISO para que puedas tomar decisiones de exposición con mayor seguridad."}, "luz": {"label": "Lectura y control de la luz", "strong": "Lees bien el comportamiento de la luz y distingues con claridad decisiones relacionadas con dirección, dureza, contraste y mezcla de fuentes.", "mid": "Reconoces varios principios de iluminación, pero será importante practicar cómo cambian sombras, contraste y dominante de color al modificar las fuentes.", "low": "Conviene reforzar la lectura de la luz: dirección, dureza, distancia, contraste y mezcla de temperaturas de color serán un eje importante al inicio."}, "criterio": {"label": "Criterio técnico y resolución de problemas", "strong": "Resuelves situaciones fotográficas con buen criterio técnico y eliges ajustes coherentes con el objetivo de la imagen.", "mid": "Tienes herramientas para resolver problemas fotográficos, aunque algunas decisiones todavía necesitan mayor precisión y justificación.", "low": "Trabajaremos especialmente la toma de decisiones técnicas: no solo qué ajuste usar, sino por qué elegirlo según el resultado visual buscado."}}, "questions": [{"area": "exposicion", "q": "Estás fotografiando un retrato a f/4, 1/125 s e ISO 400. La exposición es correcta, pero quieres congelar mejor un pequeño movimiento del sujeto sin cambiar la profundidad de campo. ¿Qué ajuste es más coherente?", "o": ["Cambiar a 1/250 s y subir a ISO 800", "Cambiar a 1/60 s y bajar a ISO 200", "Cerrar a f/8 y mantener ISO 400", "Cambiar a 1/250 s y bajar a ISO 200"], "a": 0}, {"area": "exposicion", "q": "Un objeto está correctamente expuesto a f/8, 1/60 s e ISO 200. Quieres trabajar a f/4 manteniendo el mismo ISO y la misma exposición. ¿Qué velocidad corresponde aproximadamente?", "o": ["1/15 s", "1/30 s", "1/125 s", "1/250 s"], "a": 3}, {"area": "exposicion", "q": "Fotografías en interior con poca luz. No puedes usar trípode y el sujeto se mueve. La imagen queda trepidada a 1/30 s. ¿Cuál es la solución más razonable si quieres mantener el encuadre y la profundidad de campo?", "o": ["Bajar ISO y usar una velocidad más lenta", "Subir ISO para poder usar una velocidad más rápida", "Cerrar el diafragma y mantener 1/30 s", "Cambiar el balance de blancos"], "a": 1}, {"area": "exposicion", "q": "Una fotografía muestra altas luces importantes completamente recortadas en el histograma. ¿Qué decisión técnica ayuda directamente a recuperar información en esas zonas al repetir la toma?", "o": ["Aumentar la exposición", "Reducir la exposición", "Cambiar de RAW a JPEG", "Aumentar la saturación"], "a": 1}, {"area": "luz", "q": "Quieres fotografiar un bodegón con sombras suaves y transiciones graduales. Tienes una luz LED pequeña. ¿Qué modificación sería más efectiva?", "o": ["Alejar mucho la luz sin modificar su tamaño", "Acercar la luz y aumentar su tamaño aparente mediante difusión", "Usar una velocidad de obturación más rápida", "Subir únicamente el ISO"], "a": 1}, {"area": "luz", "q": "Una ventana ilumina lateralmente un rostro y deja el lado opuesto demasiado oscuro. Sin cambiar la posición de la ventana, ¿qué recurso permite disminuir el contraste manteniendo la dirección principal de la luz?", "o": ["Añadir un reflector en el lado de sombra", "Cerrar el diafragma", "Cambiar a una focal más larga", "Aumentar la velocidad de obturación"], "a": 0}, {"area": "luz", "q": "En una escena interior entra luz de ventana azulada y además hay una lámpara tungsteno muy cálida sobre el sujeto. ¿Cuál es el principal problema técnico que debes considerar?", "o": ["La profundidad de campo será siempre insuficiente", "Puede haber dominantes de color distintas en diferentes zonas de la imagen", "La cámara perderá automáticamente el foco", "El archivo RAW dejará de registrar color"], "a": 1}, {"area": "luz", "q": "Quieres que la textura de una superficie sea más evidente. ¿Qué dirección de luz suele favorecer mejor ese resultado?", "o": ["Luz frontal cercana al eje de cámara", "Luz lateral o rasante", "Luz completamente uniforme desde todas direcciones", "Contraluz sin ninguna luz sobre la superficie"], "a": 1}, {"area": "criterio", "q": "Debes fotografiar una persona caminando y quieres que el cuerpo quede relativamente nítido, pero el fondo muestre sensación de movimiento mediante barrido. ¿Qué combinación de decisiones es la más adecuada?", "o": ["Velocidad relativamente lenta y acompañar el movimiento con la cámara", "Velocidad muy rápida y cámara inmóvil", "Trípode, sujeto inmóvil y diafragma cerrado", "ISO mínimo y enfoque manual sin mover la cámara"], "a": 0}, {"area": "criterio", "q": "En una fotografía de producto, el fondo distrae demasiado aunque la exposición del producto es correcta. ¿Qué decisión puede ayudar a separar visualmente el producto sin cambiar de ubicación?", "o": ["Aumentar la profundidad de campo al máximo", "Reducir la profundidad de campo y controlar la iluminación del fondo", "Subir la saturación de toda la imagen", "Usar siempre una velocidad más lenta"], "a": 1}, {"area": "criterio", "q": "Estás fotografiando en RAW y la imagen queda ligeramente subexpuesta, pero sin altas luces recortadas ni movimiento. ¿Cuál es la decisión más razonable antes de repetir toda la producción?", "o": ["Evaluar si la exposición puede corregirse con calidad suficiente en revelado RAW", "Convertir inmediatamente el archivo a GIF", "Eliminar el archivo porque RAW no permite correcciones", "Aumentar la nitidez al máximo y mantener la subexposición"], "a": 0}, {"area": "criterio", "q": "Dos fotografías tienen la misma exposición, pero una usa f/2.8 a 1/500 s y la otra f/11 a 1/30 s. ¿Por qué podrían verse visualmente distintas aunque reciban una cantidad similar de luz?", "o": ["Porque diafragma y velocidad también afectan profundidad de campo y representación del movimiento", "Porque el ISO cambia automáticamente en cualquier cámara", "Porque el balance de blancos depende del diafragma", "Porque una de las dos necesariamente estará desenfocada"], "a": 0}]};
+const TEACHER_EMAIL="j.ferrand@alpescft.cl";
+const QUESTIONS=COURSE.questions;
+const COMPLETION_KEY="alpes_completed_"+COURSE.code;
+let submission=null;
+const $=s=>document.querySelector(s);
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+
+function lockIfAlreadyCompleted(){
+  const raw=localStorage.getItem(COMPLETION_KEY);
+  if(!raw)return false;
+  try{
+    const saved=JSON.parse(raw);
+    $("#exam").classList.add("hidden");
+    $("#result").classList.remove("hidden");
+    $("#resultTitle").textContent="Evaluación ya finalizada";
+    $("#studentLabel").textContent=saved.name||"Estudiante";
+    $("#score").textContent=`${saved.score}/${QUESTIONS.length}`;
+    $("#percent").textContent=(saved.percent??0)+"%";
+    $("#correct").textContent=saved.score??0;
+    $("#blank").textContent=saved.blank??0;
+    $("#generalSummary").textContent="Esta evaluación ya fue finalizada en este dispositivo. No es posible volver a responderla ni modificar las respuestas enviadas.";
+    $("#areaSummary").innerHTML="";
+    $("#sendEmail").classList.add("hidden");
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+if(!lockIfAlreadyCompleted())
+$("#questions").innerHTML=QUESTIONS.map((x,i)=>`
+<section class="question">
+<div class="num">PREGUNTA ${i+1} DE ${QUESTIONS.length}</div>
+<div class="qtext">${esc(x.q)}</div>
+${x.o.map((o,j)=>`<label class="option"><input type="radio" name="q${i}" value="${j}"><span><b>${String.fromCharCode(65+j)})</b> ${esc(o)}</span></label>`).join("")}
+</section>`).join("");
+
+function performanceText(area,correct,total){
+ const ratio=total?correct/total:0;
+ if(ratio>=.75)return area.strong;
+ if(ratio>=.5)return area.mid;
+ return area.low;
+}
+function generalText(percent,blank){
+ let t="";
+ if(percent>=75) t="El diagnóstico muestra una base sólida para comenzar el semestre. Hay varios conocimientos bien instalados y eso nos permitirá avanzar rápidamente hacia problemas más aplicados y decisiones de mayor complejidad.";
+ else if(percent>=50) t="El diagnóstico muestra una base presente, aunque con algunos contenidos que todavía necesitan consolidarse. Es un buen punto de partida: durante el semestre podremos transformar esos conocimientos parciales en decisiones más seguras y consistentes.";
+ else if(percent>=25) t="El diagnóstico muestra algunos conocimientos instalados junto con áreas que necesitan mayor refuerzo. Esto nos entrega una referencia útil para comenzar: iremos recuperando fundamentos y aplicándolos de manera práctica para construir mayor seguridad.";
+ else t="El diagnóstico indica que conviene retomar varios fundamentos desde el inicio. Eso nos permite orientar mejor las primeras clases y trabajar progresivamente para que los conceptos se conviertan en herramientas concretas de resolución.";
+ if(blank>0) t+=` Además, dejaste ${blank} pregunta${blank===1?"":"s"} sin responder; las consideraremos como parte del diagnóstico y no como un problema, ya que también muestran en qué temas conviene ganar confianza.`;
+ return t;
+}
+
+$("#form").addEventListener("submit",e=>{
+ e.preventDefault();
+ const name=$("#studentName").value.trim().replace(/\s+/g," ");
+ const err=$("#error");err.classList.add("hidden");
+ if(name.length<5||!name.includes(" ")){err.textContent="Ingresa al menos nombre y apellido.";err.classList.remove("hidden");return}
+ const answers=QUESTIONS.map((_,i)=>{
+   const el=document.querySelector(`input[name=q${i}]:checked`);
+   return el?Number(el.value):null;
+ });
+ const details=QUESTIONS.map((q,i)=>({answer:answers[i],correct:answers[i]===q.a,area:q.area}));
+ const score=details.filter(d=>d.correct).length;
+ const blank=details.filter(d=>d.answer===null).length;
+ const incorrect=QUESTIONS.length-score-blank;
+ const percent=Math.round(score/QUESTIONS.length*100);
+ const areaStats={};
+ for(const key of Object.keys(COURSE.areas))areaStats[key]={correct:0,total:0};
+ details.forEach(d=>{areaStats[d.area].total++;if(d.correct)areaStats[d.area].correct++});
+ submission={name,answers,details,score,blank,incorrect,percent,areaStats,date:new Date()};
+ localStorage.setItem(COMPLETION_KEY,JSON.stringify({name,score,blank,percent,date:submission.date.toISOString()}));
+ showResult();
+});
+
+function showResult(){
+ $("#exam").classList.add("hidden");$("#result").classList.remove("hidden");
+ $("#studentLabel").textContent=submission.name;
+ $("#score").textContent=`${submission.score}/${QUESTIONS.length}`;
+ $("#percent").textContent=submission.percent+"%";
+ $("#correct").textContent=submission.score;
+ $("#blank").textContent=submission.blank;
+ $("#generalSummary").textContent=generalText(submission.percent,submission.blank);
+ $("#areaSummary").innerHTML=Object.entries(COURSE.areas).map(([key,area])=>{
+   const s=submission.areaStats[key];
+   return `<div class="area"><b>${esc(area.label)} · ${s.correct}/${s.total}</b><span>${esc(performanceText(area,s.correct,s.total))}</span></div>`;
+ }).join("");
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function emailBody(){
+ const fecha=submission.date.toLocaleString("es-CL");
+ let body=`EVALUACIÓN DIAGNÓSTICA - ${COURSE.title}
+
+Alumno: ${submission.name}
+Fecha: ${fecha}
+Puntaje: ${submission.score}/${QUESTIONS.length}
+Resultado: ${submission.percent}%
+Correctas: ${submission.score}
+Incorrectas: ${submission.incorrect}
+Sin responder: ${submission.blank}
+
+RESUMEN DIAGNÓSTICO
+${generalText(submission.percent,submission.blank)}
+
+`;
+ Object.entries(COURSE.areas).forEach(([key,area])=>{
+   const s=submission.areaStats[key];
+   body+=`${area.label}: ${s.correct}/${s.total}
+${performanceText(area,s.correct,s.total)}
+
+`;
+ });
+ body+="RESPUESTAS DEL ALUMNO\n";
+ QUESTIONS.forEach((q,i)=>{
+   const a=submission.answers[i];
+   const ans=a===null?"SIN RESPONDER":`${String.fromCharCode(65+a)}) ${q.o[a]}`;
+   body+=`${i+1}. ${ans}\n`;
+ });
+ body+=`\n---\nEvaluación diagnóstica CFT ALPES.`;
+ return body;
+}
+
+$("#sendEmail").onclick=()=>{
+ if(!submission)return;
+ const subject=`Evaluación Diagnóstica - ${COURSE.title} - ${submission.name}`;
+ location.href=`mailto:${TEACHER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody())}`;
+};
+</script>
+</body>
+</html>
