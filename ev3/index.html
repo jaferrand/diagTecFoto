@@ -782,8 +782,8 @@ const VERSIONS = {
       { id: 'q6', tema: 'Modificadores', match: ['paraguas', 'bandera', 'beautydish', 'reflector'],
         t: 'Estos son algunos de los accesorios que llevaste a la sesión. Escribe el nombre técnico de cada uno.' },
       { id: 'q7', tema: 'Planta de iluminación', ill: () => PLANTAS[2](),
-        t: 'En la planta, <b>B</b> es la luz principal, a 45° a la izquierda de la cámara, y <b>C</b> está a la derecha de la persona. ¿Qué lado del rostro quedará más oscuro y qué lo aclara?',
-        o: [['a', 'El lado izquierdo; lo aclara C'], ['b', 'El lado derecho; lo aclara el fondo'], ['c', 'No se puede saber con una planta'], ['d', 'El lado derecho; lo aclara C']] },
+        t: 'Mira la planta <b>como la ve el fotógrafo desde la cámara</b>. <b>B</b>, la luz principal, está a la izquierda, y <b>C</b> está a la derecha. Mirando la foto, ¿qué lado del rostro quedará más oscuro y qué lo aclara?',
+        o: [['a', 'El lado izquierdo de la foto; lo aclara C'], ['b', 'El lado derecho de la foto; lo aclara el fondo'], ['c', 'No se puede saber con una planta'], ['d', 'El lado derecho de la foto; lo aclara C']] },
       { id: 'q8', tema: 'Planta de iluminación', ill: () => PLANTAS[2](),
         t: 'Un colega va a fotografiar al resto del equipo la próxima semana usando tu planta. ¿Qué dato <b>no</b> le entrega este dibujo?',
         o: [['a', 'La altura del beauty dish respecto de la cara'], ['b', 'De qué lado llega la luz principal'], ['c', 'Dónde se ubica el reflector'], ['d', 'Qué hay detrás de la persona']] }
